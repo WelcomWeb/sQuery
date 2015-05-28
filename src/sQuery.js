@@ -105,28 +105,38 @@
 
 	},
 
-	_addClass = function(el, className){
+	_addClass = function(el, classNames){
 
-		if(!!el.classList) return el.classList.add(className);
+		if(!!el.classList) return DOMTokenList.prototype.add.apply(el.classList, classNames.split(' '));
 
-		var classNames = el.className.split(' ');
+		var existing = el.className.split(' ');
 
-		if(_indexOf(classNames) > -1) return;
+		if(_indexOf(existing) > -1) return;
 
-		el.className += el.className + ' ' + className;
+		var classNameArr = classNames.split(' ');
+
+		for(var i = 0; i < classNameArr.length; i++){
+			if(_isInArray(existing, classNameArr[i])) continue;
+			existing.push(classNameArr[i])
+		}
+
+		el.className = existing.join(' ');
 
 	},
 
-	_removeClass = function(el, className){
+	_removeClass = function(el, classNames){
 
-		if(!!el.classList) return el.classList.remove(className);
+		if(!!el.classList) return DOMTokenList.prototype.remove.apply(el.classList, classNames.split(' '));
 
-		var classNames = el.className.split(' ');
-		var index = _indexOf(classNames);
-		
-		if(index === -1) return;
+		var existing = el.className.split(' ');
+		var classNameArr = classNames.split(' ');
 
-		el.className = classNames.splice(index, 1).join(' ');
+		for(var i = 0; i < classNameArr.length; i++){
+			if(!_isInArray(existing, classNameArr[i])) continue;
+			existing.splice(i)
+		}
+
+		el.className = existing.join(' ');
 
 	},
 
