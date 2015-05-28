@@ -107,6 +107,8 @@
 
 	_addClass = function(el, classNames){
 
+		if(!classNames) return;
+
 		if(!!el.classList) return DOMTokenList.prototype.add.apply(el.classList, classNames.split(' '));
 
 		var existing = el.className.split(' ');
@@ -125,6 +127,8 @@
 	},
 
 	_removeClass = function(el, classNames){
+
+		if(!classNames) return;
 
 		if(!!el.classList) return DOMTokenList.prototype.remove.apply(el.classList, classNames.split(' '));
 
@@ -145,6 +149,7 @@
 	},
 
 	_toggleClass = function(el, className){
+		if(!className) return;
 		if(_hasClass(el, className)) _removeClass(el, className);
 		else _addClass(el, className);
 	},
