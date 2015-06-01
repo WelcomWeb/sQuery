@@ -15,7 +15,9 @@
 	_types = {
 		FUNCTION: '[object Function]',
 		STRING: '[object String]',
-		ARRAY: '[object Array]'
+		ARRAY: '[object Array]',
+		OBJECT: '[object Object]',
+		NUMBER: '[object Number]'
 	},
 
 	_isFunction = function(obj){
@@ -32,6 +34,14 @@
 
 	_isArray = function(obj){
 		return Object.prototype.toString.call(obj) === _types.ARRAY;
+	},
+
+	_isObject = function(obj){
+		return Object.prototype.toString.call(obj) === _types.OBJECT;
+	},
+
+	_isNumber = function(obj){
+		return Object.prototype.toString.call(obj) === _types.NUMBER;
 	},
 
 	_toArray = function(collection){
@@ -198,6 +208,29 @@
 		return arr;
 	},
 
+	_css = function(){
+
+		if(arguments.length < 2 || !_isElement(arguments[0])) return;
+
+		var el = arguments[0];
+		var args = arguments[1];
+
+		if(args.length == 2 && _isString(args[0]) && _isString(args[1])){
+			el.style[args[0]] = args[1];
+		}
+		else{
+
+			var styles = !!args.length ? args[0] : args;
+
+			for(var style in styles){
+				if(!(_isString(styles[style]) || _isNumber(styles[style]))) continue;
+				el.style[style] = styles[style];
+			}
+
+		}
+
+	},
+
 	_doForAll = function(){
 		var args = _toArray(arguments);
 		var returns = [];
@@ -216,12 +249,30 @@
 
 	sQuery.fn = sQuery.prototype = {
 
+		// Loop
 		each: function(callback){
 
 			for(var i = 0; i < this.length; i++) callback.call(this[i], this[i], i);
 
 		},
 
+		// Css shorts
+		show: function(){
+			_doForAll(this, _css, {display: 'block'});
+			return this;
+		},
+
+		hide: function(){
+			_doForAll(this, _css, {display: 'none'});
+			return this;
+		},
+
+		css: function(){
+			_doForAll(this, _css, arguments);
+			return this;
+		},
+
+		// Class names
 		addClass: function(className){
 			_doForAll(this, _addClass, className);
 			return this;
@@ -242,11 +293,14 @@
 			
 		},
 
+		// Events
 		on: function(eventName, callback){
 			_doForAll(this, _on, eventName, callback);
 			return this;
 		},
 
+
+		// DOM manipulation
 		children: function(selector){
 			var arr = _doForAll(this, _children, selector);
 			return new sQuery.fn.init(arr);
