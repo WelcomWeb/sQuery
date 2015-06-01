@@ -148,10 +148,15 @@
 		return _indexOf(el.className.split(' '), className) > -1;
 	},
 
-	_toggleClass = function(el, className){
-		if(!className) return;
-		if(_hasClass(el, className)) _removeClass(el, className);
-		else _addClass(el, className);
+	_toggleClass = function(el, classNames){
+		if(!classNames) return;
+
+		var classNames = classNames.split(' ');
+
+		for(var i = 0; i < classNames.length; i++){
+			if(_hasClass(el, classNames[i])) _removeClass(el, classNames[i]);
+			else _addClass(el, classNames[i]);
+		}
 	},
 
 	_children = function(context, selector){
@@ -188,7 +193,7 @@
 	_filter = function(sqObj, selector){
 		var arr = [];
 		for(var i = 0; i < sqObj.length; i++){
-			if(_matches(sqObj[i])) arr.push(sqObj[i]);
+			if(_matches(sqObj[i], selector)) arr.push(sqObj[i]);
 		}
 		return arr;
 	},
