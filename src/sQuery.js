@@ -64,6 +64,18 @@
 		return false;
 	},
 
+	_split = function(str, separator){
+
+		var arr = str.split(separator);
+		var retArr = [];
+		for(var i = 0; i < arr.length; i++){
+			if(arr[i] === '') continue;
+			retArr.push(arr[i]);
+		}
+		return retArr;
+
+	},
+
 	_allTrue = function(array){
 		for(var i = 0; i < array.length; i++){
 			if(!array[i]) return false;
@@ -90,8 +102,12 @@
 
 		if(!context) return;
 
-		if(context.addEventListener) context.addEventListener(name, callback);
-		else context.attachEvent('on' + name, callback);
+		var _callback = function(e){
+			callback.call(context, e);
+		};
+
+		if(context.addEventListener) context.addEventListener(name, _callback);
+		else context.attachEvent('on' + name, _callback);
 
 	},
 
@@ -121,11 +137,11 @@
 
 		if(!!el.classList) return DOMTokenList.prototype.add.apply(el.classList, classNames.split(' '));
 
-		var existing = el.className.split(' ');
+		var existing = _split(el.className, ' ');
 
 		if(_indexOf(existing) > -1) return;
 
-		var classNameArr = classNames.split(' ');
+		var classNameArr = _split(classNames, ' ');
 
 		for(var i = 0; i < classNameArr.length; i++){
 			if(_isInArray(existing, classNameArr[i])) continue;
@@ -142,15 +158,15 @@
 
 		if(!!el.classList) return DOMTokenList.prototype.remove.apply(el.classList, classNames.split(' '));
 
-		var existing = el.className.split(' ');
-		var classNameArr = classNames.split(' ');
+		var existing = _split(el.className, ' ');
+		var classNameArr = _split(classNames, ' ');
+		var retArr = [];
 
-		for(var i = 0; i < classNameArr.length; i++){
-			if(!_isInArray(existing, classNameArr[i])) continue;
-			existing.splice(i)
+		for(var i = 0; i < existing.length; i++){
+			if(!_isInArray(classNameArr, existing[i])) retArr.push(existing[i]);
 		}
 
-		el.className = existing.join(' ');
+		el.className = retArr.join(' ');
 
 	},
 
