@@ -247,6 +247,18 @@
 
 	},
 
+	_val = function(el){
+		return el.value;
+	},
+
+	_text = function(el){
+		return el.innerText;
+	},
+
+	_html = function(){
+		return el.innerHTML;
+	},
+
 	_doForAll = function(){
 		var args = _toArray(arguments);
 		var returns = [];
@@ -333,6 +345,19 @@
 
 		parent: function(selector){
 			return new sQuery.fn.init(_parents(this, selector));
+		},
+
+		// Node content
+		text: function(){
+			return _text(this[0]);
+		},
+
+		val: function(){
+			return _val(this[0]);
+		},
+
+		html: function(){
+			return _html(this[0]);
 		}
 
 	};
