@@ -80,8 +80,12 @@
 
 		if(!context) return;
 
-		if(context.addEventListener) context.addEventListener(name, callback);
-		else context.attachEvent('on' + name, callback);
+		var internalCallback = function(e){
+			callback.call(context, e);
+		}
+
+		if(context.addEventListener) context.addEventListener(name, internalCallback);	
+		else context.attachEvent('on' + name, internalCallback);
 
 	},
 
@@ -212,9 +216,7 @@
 	sQuery.fn = sQuery.prototype = {
 
 		each: function(callback){
-
 			for(var i = 0; i < this.length; i++) callback.call(this[i], this[i], i);
-
 		},
 
 		addClass: function(className){
@@ -258,6 +260,10 @@
 
 		parent: function(selector){
 			return new sQuery.fn.init(_parents(this, selector));
+		},
+
+		ready: function(callback){
+			this.on('load', callback);
 		}
 
 	};
@@ -266,6 +272,7 @@
 
 		if(!selector) return this;
 
+		// Functions means it's short for 
 		if(_isFunction(selector)){
 			sQuery.ready(selector);
 			return;	
