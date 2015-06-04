@@ -248,15 +248,15 @@
 	},
 
 	_val = function(el){
-		return el.value;
+		return !!el ? el.value : undefined;
 	},
 
 	_text = function(el){
-		return el.innerText;
+		return !!el ? el.innerText : undefined;
 	},
 
-	_html = function(){
-		return el.innerHTML;
+	_html = function(el){
+		return !!el ? el.innerHTML : undefined;
 	},
 
 	_doForAll = function(){
