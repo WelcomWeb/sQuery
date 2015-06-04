@@ -279,9 +279,7 @@
 
 		// Loop
 		each: function(callback){
-
 			for(var i = 0; i < this.length; i++) callback.call(this[i], this[i], i);
-
 		},
 
 		// Css shorts
@@ -358,6 +356,10 @@
 
 		html: function(){
 			return _html(this[0]);
+		},
+
+		ready: function(callback){
+			this.on('load', callback);
 		}
 
 	};
@@ -366,6 +368,7 @@
 
 		if(!selector) return this;
 
+		// Functions means it's short for 
 		if(_isFunction(selector)){
 			sQuery.ready(selector);
 			return;	
