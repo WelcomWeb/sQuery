@@ -15,7 +15,9 @@
 	_types = {
 		FUNCTION: '[object Function]',
 		STRING: '[object String]',
-		ARRAY: '[object Array]'
+		ARRAY: '[object Array]',
+		OBJECT: '[object Object]',
+		NUMBER: '[object Number]'
 	},
 
 	_isFunction = function(obj){
@@ -32,6 +34,14 @@
 
 	_isArray = function(obj){
 		return Object.prototype.toString.call(obj) === _types.ARRAY;
+	},
+
+	_isObject = function(obj){
+		return Object.prototype.toString.call(obj) === _types.OBJECT;
+	},
+
+	_isNumber = function(obj){
+		return Object.prototype.toString.call(obj) === _types.NUMBER;
 	},
 
 	_toArray = function(collection){
@@ -52,6 +62,18 @@
 		}
 
 		return false;
+	},
+
+	_split = function(str, separator){
+
+		var arr = str.split(separator);
+		var retArr = [];
+		for(var i = 0; i < arr.length; i++){
+			if(arr[i] === '') continue;
+			retArr.push(arr[i]);
+		}
+		return retArr;
+
 	},
 
 	_allTrue = function(array){
@@ -80,12 +102,12 @@
 
 		if(!context) return;
 
-		var internalCallback = function(e){
+		var _callback = function(e){
 			callback.call(context, e);
-		}
+		};
 
-		if(context.addEventListener) context.addEventListener(name, internalCallback);	
-		else context.attachEvent('on' + name, internalCallback);
+		if(context.addEventListener) context.addEventListener(name, _callback);
+		else context.attachEvent('on' + name, _callback);
 
 	},
 
@@ -115,11 +137,11 @@
 
 		if(!!el.classList) return DOMTokenList.prototype.add.apply(el.classList, classNames.split(' '));
 
-		var existing = el.className.split(' ');
+		var existing = _split(el.className, ' ');
 
 		if(_indexOf(existing) > -1) return;
 
-		var classNameArr = classNames.split(' ');
+		var classNameArr = _split(classNames, ' ');
 
 		for(var i = 0; i < classNameArr.length; i++){
 			if(_isInArray(existing, classNameArr[i])) continue;
@@ -136,15 +158,15 @@
 
 		if(!!el.classList) return DOMTokenList.prototype.remove.apply(el.classList, classNames.split(' '));
 
-		var existing = el.className.split(' ');
-		var classNameArr = classNames.split(' ');
+		var existing = _split(el.className, ' ');
+		var classNameArr = _split(classNames, ' ');
+		var retArr = [];
 
-		for(var i = 0; i < classNameArr.length; i++){
-			if(!_isInArray(existing, classNameArr[i])) continue;
-			existing.splice(i)
+		for(var i = 0; i < existing.length; i++){
+			if(!_isInArray(classNameArr, existing[i])) retArr.push(existing[i]);
 		}
 
-		el.className = existing.join(' ');
+		el.className = retArr.join(' ');
 
 	},
 
@@ -152,10 +174,15 @@
 		return _indexOf(el.className.split(' '), className) > -1;
 	},
 
-	_toggleClass = function(el, className){
-		if(!className) return;
-		if(_hasClass(el, className)) _removeClass(el, className);
-		else _addClass(el, className);
+	_toggleClass = function(el, classNames){
+		if(!classNames) return;
+
+		var classNames = classNames.split(' ');
+
+		for(var i = 0; i < classNames.length; i++){
+			if(_hasClass(el, classNames[i])) _removeClass(el, classNames[i]);
+			else _addClass(el, classNames[i]);
+		}
 	},
 
 	_children = function(context, selector){
@@ -192,9 +219,32 @@
 	_filter = function(sqObj, selector){
 		var arr = [];
 		for(var i = 0; i < sqObj.length; i++){
-			if(_matches(sqObj[i])) arr.push(sqObj[i]);
+			if(_matches(sqObj[i], selector)) arr.push(sqObj[i]);
 		}
 		return arr;
+	},
+
+	_css = function(){
+
+		if(arguments.length < 2 || !_isElement(arguments[0])) return;
+
+		var el = arguments[0];
+		var args = arguments[1];
+
+		if(args.length == 2 && _isString(args[0]) && _isString(args[1])){
+			el.style[args[0]] = args[1];
+		}
+		else{
+
+			var styles = !!args.length ? args[0] : args;
+
+			for(var style in styles){
+				if(!(_isString(styles[style]) || _isNumber(styles[style]))) continue;
+				el.style[style] = styles[style];
+			}
+
+		}
+
 	},
 
 	_doForAll = function(){
@@ -215,10 +265,28 @@
 
 	sQuery.fn = sQuery.prototype = {
 
+		// Loop
 		each: function(callback){
 			for(var i = 0; i < this.length; i++) callback.call(this[i], this[i], i);
 		},
 
+		// Css shorts
+		show: function(){
+			_doForAll(this, _css, {display: 'block'});
+			return this;
+		},
+
+		hide: function(){
+			_doForAll(this, _css, {display: 'none'});
+			return this;
+		},
+
+		css: function(){
+			_doForAll(this, _css, arguments);
+			return this;
+		},
+
+		// Class names
 		addClass: function(className){
 			_doForAll(this, _addClass, className);
 			return this;
@@ -239,11 +307,14 @@
 			
 		},
 
+		// Events
 		on: function(eventName, callback){
 			_doForAll(this, _on, eventName, callback);
 			return this;
 		},
 
+
+		// DOM manipulation
 		children: function(selector){
 			var arr = _doForAll(this, _children, selector);
 			return new sQuery.fn.init(arr);
